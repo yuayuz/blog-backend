@@ -1,4 +1,6 @@
 mod s3_client;
+mod routes;
+use routes::{gallery};
 
 use dotenvy::dotenv;
 use std::env;
@@ -14,7 +16,6 @@ use bytes::Bytes;
 
 #[tokio::main]
 async fn main()->Result<(),Box<dyn std::error::Error>> {
-    dotenv().ok();
 
     // 加载 .env 文件
     dotenv().ok();
@@ -27,6 +28,7 @@ async fn main()->Result<(),Box<dyn std::error::Error>> {
 
     let app = Router::new()
         .route("/", get(root))
+        .nest("/gallery",gallery::router(bucket.clone()))
         .layer(Extension(bucket));
 
 
