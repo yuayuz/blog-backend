@@ -8,11 +8,12 @@ use std::sync::Arc;
 use axum::{routing::get, Router};
 use axum::body::Body;
 use axum::extract::Extension;
-use axum::http::{header, StatusCode};
+use axum::http::{header, Method, StatusCode};
 use axum::response::{IntoResponse, Response};
 use s3::Bucket;
 use tracing::{info};
 use bytes::Bytes;
+use tower_http::cors::{Any, CorsLayer};
 
 #[tokio::main]
 async fn main()->Result<(),Box<dyn std::error::Error>> {
@@ -26,9 +27,15 @@ async fn main()->Result<(),Box<dyn std::error::Error>> {
 
     let addr = env::var("SERVER_ADDR").unwrap_or_else(|_| "0.0.0.0:8000".to_string());
 
+    let cors = CorsLayer::new()
+        .allow_origin(Any) // 允许所有来源，生产环境建议限定具体域名
+        .allow_methods([Method::GET, Method::POST, Method::OPTIONS])
+        .allow_headers(Any);
+
     let app = Router::new()
         .route("/", get(root))
         .nest("/gallery",gallery::router(bucket.clone()))
+        .layer(cors)
         .layer(Extension(bucket));
 
 
