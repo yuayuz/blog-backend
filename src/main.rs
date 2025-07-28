@@ -1,23 +1,22 @@
-mod s3_client;
 mod routes;
-use routes::{gallery};
+mod s3_client;
+use routes::{gallery, image};
 
-use dotenvy::dotenv;
-use std::env;
-use std::sync::Arc;
-use axum::{routing::get, Router};
 use axum::body::Body;
 use axum::extract::Extension;
-use axum::http::{header, Method, StatusCode};
+use axum::http::{Method, StatusCode, header};
 use axum::response::{IntoResponse, Response};
-use s3::Bucket;
-use tracing::{info};
+use axum::{Router, routing::get};
 use bytes::Bytes;
+use dotenvy::dotenv;
+use s3::Bucket;
+use std::env;
+use std::sync::Arc;
 use tower_http::cors::{Any, CorsLayer};
+use tracing::info;
 
 #[tokio::main]
-async fn main()->Result<(),Box<dyn std::error::Error>> {
-
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 加载 .env 文件
     dotenv().ok();
 
@@ -34,10 +33,10 @@ async fn main()->Result<(),Box<dyn std::error::Error>> {
 
     let app = Router::new()
         .route("/", get(root))
-        .nest("/gallery",gallery::router(bucket.clone()))
+        .nest("/gallery", gallery::router(bucket.clone()))
+        .nest("/image", image::router(bucket.clone()))
         .layer(cors)
         .layer(Extension(bucket));
-
 
     info!("Listening on {}", addr);
 
