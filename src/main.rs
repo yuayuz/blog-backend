@@ -1,12 +1,11 @@
 mod db;
+mod handlers;
 mod routes;
 mod s3_client;
 
-use routes::{gallery, image};
-
-use axum::http::{Method, StatusCode};
-use axum::response::{IntoResponse};
-use axum::{Router, routing::get};
+use crate::routes::router as routes_router;
+use axum::Router;
+use axum::http::Method;
 use db::create_pool;
 use dotenvy::dotenv;
 use s3::Bucket;
@@ -43,10 +42,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .allow_headers(Any);
 
     let app = Router::new()
-        .route("/", get(root))
-        .nest("/gallery", gallery::router())
-        .nest("/image", image::router())
-        .with_state(state) // ✅ 整个 AppState 传进来
+        .merge(routes_router()) // 挂载 routes 模块的所有路由
+        .with_state(state) //  整个 AppState 传进来
         .layer(cors);
 
     info!("Listening on {}", addr);
@@ -55,8 +52,4 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     axum::serve(listener, app).await.unwrap();
 
     Ok(())
-}
-
-async fn root() -> impl IntoResponse {
-    (StatusCode::OK, "hello")
 }
