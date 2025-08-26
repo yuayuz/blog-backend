@@ -2,6 +2,7 @@ mod db;
 mod handlers;
 mod routes;
 mod s3_client;
+mod service;
 
 use crate::routes::router as routes_router;
 use axum::Router;
