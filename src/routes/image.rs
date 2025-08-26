@@ -1,27 +1,23 @@
-use axum::extract::Path;
-use axum::http::{StatusCode, header};
+use crate::AppState;
+use axum::extract::{Path, State};
+use axum::http::{header, StatusCode};
 use axum::response::{IntoResponse, Response};
 use axum::routing::get;
-use axum::{Extension, Router};
+use axum::Router;
 use bytes::Bytes;
-use s3::Bucket;
-use std::sync::Arc;
 
-pub fn router(bucket: Arc<Bucket>) -> Router {
+pub fn router() -> Router<AppState> {
     Router::new()
         .route("/", get(root))
         .route("/{*path}", get(get_image))
-        .layer(Extension(bucket))
 }
 
 async fn root() -> impl IntoResponse {
     { StatusCode::OK }.into_response()
 }
 
-async fn get_image(
-    Path(path): Path<String>,
-    Extension(bucket): Extension<Arc<Bucket>>,
-) -> impl IntoResponse {
+async fn get_image(Path(path): Path<String>, State(state): State<AppState>) -> impl IntoResponse {
+    let bucket = &state.bucket;
     match bucket.get_object(&path).await {
         Ok(obj) => {
             let body: Bytes = obj.bytes().clone();

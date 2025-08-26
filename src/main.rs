@@ -1,19 +1,26 @@
+mod db;
 mod routes;
 mod s3_client;
+
 use routes::{gallery, image};
 
-use axum::body::Body;
-use axum::extract::Extension;
-use axum::http::{Method, StatusCode, header};
-use axum::response::{IntoResponse, Response};
+use axum::http::{Method, StatusCode};
+use axum::response::{IntoResponse};
 use axum::{Router, routing::get};
-use bytes::Bytes;
+use db::create_pool;
 use dotenvy::dotenv;
 use s3::Bucket;
+use sqlx::PgPool;
 use std::env;
 use std::sync::Arc;
 use tower_http::cors::{Any, CorsLayer};
 use tracing::info;
+
+#[derive(Clone)]
+pub struct AppState {
+    pub pool: PgPool,
+    pub bucket: Arc<Bucket>,
+}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -24,6 +31,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let bucket = s3_client::init_bucket().await?;
 
+    let pool = create_pool().await;
+
+    let state = AppState { pool, bucket };
+
     let addr = env::var("SERVER_ADDR").unwrap_or_else(|_| "0.0.0.0:8000".to_string());
 
     let cors = CorsLayer::new()
@@ -33,10 +44,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let app = Router::new()
         .route("/", get(root))
-        .nest("/gallery", gallery::router(bucket.clone()))
-        .nest("/image", image::router(bucket.clone()))
-        .layer(cors)
-        .layer(Extension(bucket));
+        .nest("/gallery", gallery::router())
+        .nest("/image", image::router())
+        .with_state(state) // ✅ 整个 AppState 传进来
+        .layer(cors);
 
     info!("Listening on {}", addr);
 
@@ -46,25 +57,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-async fn root(Extension(bucket): Extension<Arc<Bucket>>) -> impl IntoResponse {
-    match bucket.get_object("test.txt").await {
-        Ok(obj) => {
-            let body = obj.bytes();
-            let response: Response<Body> = Response::builder()
-                .status(StatusCode::OK)
-                .header(header::CONTENT_TYPE, "text/plain")
-                .body(Body::from(body.clone()))
-                .unwrap();
-            response
-        }
-        Err(_) => {
-            let body = Bytes::from("文件不存在");
-            let response: Response<Body> = Response::builder()
-                .status(StatusCode::NOT_FOUND)
-                .header(header::CONTENT_TYPE, "text/plain")
-                .body(Body::from(body))
-                .unwrap();
-            response
-        }
-    }
+async fn root() -> impl IntoResponse {
+    (StatusCode::OK, "hello")
 }

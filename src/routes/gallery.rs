@@ -1,22 +1,20 @@
-use axum::extract::{Path, Query};
+use crate::AppState;
+use axum::extract::{Path, Query, State};
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
-use axum::{Extension, Json, Router, routing::get};
+use axum::{Json, Router, routing::get};
 use base64::Engine;
 use base64::engine::general_purpose;
 use regex::Regex;
-use s3::Bucket;
 use serde::{Deserialize, Serialize};
 use std::error::Error;
-use std::sync::Arc;
 use tracing::error;
 
-pub fn router(bucket: Arc<Bucket>) -> Router {
+pub fn router() -> Router<AppState> {
     Router::new()
         .route("/", get(list_galleries))
         .route("/{name}", get(get_galleries))
         .route("/{name}/images", get(get_gallery_images))
-        .layer(Extension(bucket))
 }
 
 #[derive(Serialize, Debug)]
@@ -44,7 +42,8 @@ fn parse_meta(content: &str) -> Result<MetaData, Box<dyn Error>> {
     }
 }
 
-pub async fn list_galleries(Extension(bucket): Extension<Arc<Bucket>>) -> impl IntoResponse {
+pub async fn list_galleries(State(state): State<AppState>) -> impl IntoResponse {
+    let bucket = &state.bucket;
     let list_result = bucket
         .list("gallery/".to_string(), Some("/".to_string()))
         .await;
@@ -127,8 +126,9 @@ pub async fn list_galleries(Extension(bucket): Extension<Arc<Bucket>>) -> impl I
 
 async fn get_galleries(
     Path(name): Path<String>,
-    Extension(bucket): Extension<Arc<Bucket>>,
+    State(state): State<AppState>,
 ) -> impl IntoResponse {
+    let bucket = &state.bucket;
     let prefix = format!("gallery/{}/", name);
     let list_result = bucket.list(prefix, Some("/".to_string())).await;
     match list_result {
@@ -160,8 +160,9 @@ pub struct PaginationParams {
 async fn get_gallery_images(
     Path(name): Path<String>,
     Query(params): Query<PaginationParams>,
-    Extension(bucket): Extension<Arc<Bucket>>,
+    State(state): State<AppState>,
 ) -> impl IntoResponse {
+    let bucket = &state.bucket;
     let prefix = format!("gallery/{}/", name);
     let page_size = params.page_size.unwrap_or(9);
     let page = params.page.unwrap_or(1);
