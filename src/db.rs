@@ -9,4 +9,3 @@ pub async fn create_pool() -> PgPool {
         .await
         .expect("Failed to connect to PostgreSQL")
 }
-

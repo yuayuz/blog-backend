@@ -1,7 +1,7 @@
 use crate::AppState;
-use axum::routing::get;
-use axum::Router;
 use crate::service::image_service::{get_image, image_root};
+use axum::Router;
+use axum::routing::get;
 
 pub fn router() -> Router<AppState> {
     Router::new()

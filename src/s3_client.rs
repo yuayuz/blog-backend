@@ -26,4 +26,3 @@ pub async fn init_bucket() -> Result<Arc<Bucket>, Box<dyn std::error::Error>> {
 
     Ok(Arc::new(*bucket))
 }
-
