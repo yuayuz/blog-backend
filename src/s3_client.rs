@@ -18,8 +18,6 @@ pub async fn init_bucket() -> Result<Arc<Bucket>, Box<dyn std::error::Error>> {
         endpoint,
     };
 
-    let bucket_name = bucket_name;
-
     let credentials = Credentials::new(Some(&access_key), Some(&secret_key), None, None, None)?;
 
     let bucket = Bucket::new(&bucket_name, region.clone(), credentials.clone())?;

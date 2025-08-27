@@ -63,7 +63,7 @@ pub async fn list_galleries(State(state): State<AppState>) -> impl IntoResponse 
                                     if let Ok(meta_response) = bucket.get_object(&obj.key).await {
                                         let meta_bytes = meta_response.bytes();
                                         let content =
-                                            String::from_utf8_lossy(&meta_bytes).to_string();
+                                            String::from_utf8_lossy(meta_bytes).to_string();
 
                                         match parse_meta(&content) {
                                             Ok(meta) => {
@@ -82,7 +82,7 @@ pub async fn list_galleries(State(state): State<AppState>) -> impl IntoResponse 
                                     if let Ok(cover_response) = bucket.get_object(&obj.key).await {
                                         let cover_bytes = cover_response.bytes(); // 读取字节
                                         let base64_str =
-                                            general_purpose::STANDARD.encode(&cover_bytes);
+                                            general_purpose::STANDARD.encode(cover_bytes);
                                         let cover_image_base64 =
                                             format!("data:image/webp;base64,{}", base64_str);
 
