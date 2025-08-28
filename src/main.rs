@@ -1,5 +1,6 @@
 mod db;
 mod handlers;
+mod models;
 mod routes;
 mod s3_client;
 mod service;
