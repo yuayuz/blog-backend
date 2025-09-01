@@ -1,4 +1,5 @@
 use crate::models::gallery::{GalleryEntity, GalleryResponse, PaginationParams};
+use crate::repository::gallery_repository::get_all_galleries;
 use axum::Json;
 use axum::response::IntoResponse;
 use base64::Engine;
@@ -9,14 +10,11 @@ use std::sync::Arc;
 use tracing::error;
 
 pub async fn list_galleries(pool: PgPool, bucket: Arc<Bucket>) -> impl IntoResponse {
-    let rows: Vec<GalleryEntity> = match sqlx::query_as("SELECT * FROM galleries")
-        .fetch_all(&pool)
-        .await
-    {
+    let rows: Vec<GalleryEntity> = match get_all_galleries(pool).await {
         Ok(rows) => rows,
         Err(e) => {
             error!("DB query failed: {}", e);
-            return Json(Vec::<GalleryResponse>::new());
+            return Json(Vec::new());
         }
     };
 

@@ -4,6 +4,7 @@ mod models;
 mod routes;
 mod s3_client;
 mod service;
+mod repository;
 
 use crate::routes::router as routes_router;
 use axum::Router;
