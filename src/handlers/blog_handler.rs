@@ -1,5 +1,7 @@
 use crate::AppState;
-use crate::service::blog_service::{get_child_types_service, get_primary_types_service};
+use crate::service::blog_service::{
+    get_all_types_service, get_child_types_service, get_primary_types_service,
+};
 use axum::Router;
 use axum::extract::{Path, State};
 use axum::response::IntoResponse;
@@ -8,8 +10,15 @@ use sqlx::PgPool;
 
 pub fn router() -> Router<AppState> {
     Router::new()
+        .route("/allTypes", get(get_all_types_handler))
         .route("/primaryTypes", get(get_primary_types_handler))
         .route("/childTypes/{parent}", get(get_child_types_handler))
+}
+
+async fn get_all_types_handler(State(state): State<AppState>) -> impl IntoResponse {
+    let pool: PgPool = state.pool.clone();
+
+    get_all_types_service(pool).await
 }
 
 async fn get_primary_types_handler(State(state): State<AppState>) -> impl IntoResponse {
