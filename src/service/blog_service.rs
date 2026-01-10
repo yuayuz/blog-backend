@@ -1,7 +1,7 @@
 use crate::models::md_parser::parse_md;
 use crate::models::post::{ArticleContentParams, BlogPost, BlogPostType};
 use crate::repository::blog_repository::{
-    get_all_posts, get_all_types, get_child_types, get_posts, get_primary_types,
+    get_all_posts, get_all_types, get_child_types, get_posts, get_posts_by_tag, get_primary_types,
 };
 use axum::Json;
 use axum::http::{StatusCode, header};
@@ -45,6 +45,13 @@ pub async fn get_all_posts_service(pool: PgPool) -> impl IntoResponse {
 
 pub async fn get_posts_service(pool: PgPool, type_key: String) -> impl IntoResponse {
     let rows: Vec<BlogPost> = get_posts(pool, &type_key).await.unwrap_or_else(|e| {
+        error!("数据库查询失败: {}", e);
+        Vec::new()
+    });
+    Json(rows)
+}
+pub async fn get_posts_by_tag_service(pool: PgPool, tag: String) -> impl IntoResponse {
+    let rows: Vec<BlogPost> = get_posts_by_tag(pool, &tag).await.unwrap_or_else(|e| {
         error!("数据库查询失败: {}", e);
         Vec::new()
     });

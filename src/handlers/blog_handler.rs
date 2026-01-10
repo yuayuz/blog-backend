@@ -1,8 +1,10 @@
 use crate::AppState;
 use crate::models::post::ArticleContentParams;
+use crate::repository::blog_repository::get_posts_by_tag;
 use crate::service::blog_service::{
     get_all_posts_service, get_all_types_service, get_article_content_service,
-    get_child_types_service, get_posts_service, get_primary_types_service,
+    get_child_types_service, get_posts_by_tag_service, get_posts_service,
+    get_primary_types_service,
 };
 use axum::Router;
 use axum::extract::{Path, Query, State};
@@ -17,7 +19,8 @@ pub fn router() -> Router<AppState> {
         .route("/primaryTypes", get(get_primary_types_handler))
         .route("/childTypes/{parent}", get(get_child_types_handler))
         .route("/allPosts", get(get_all_posts_handler))
-        .route("/posts/{type_key}", get(get_posts_handler))
+        .route("/posts/type/{type_key}", get(get_posts_handler))
+        .route("/posts/tag/{tag}", get(get_posts_by_tag_handler))
         .route("/article", get(get_article_content_handler))
 }
 
@@ -54,6 +57,15 @@ async fn get_posts_handler(
     let pool: PgPool = state.pool.clone();
 
     get_posts_service(pool, type_key).await
+}
+
+async fn get_posts_by_tag_handler(
+    State(state): State<AppState>,
+    Path(tag): Path<String>,
+) -> impl IntoResponse {
+    let pool: PgPool = state.pool.clone();
+
+    get_posts_by_tag_service(pool, tag).await
 }
 async fn get_article_content_handler(
     Query(params): Query<ArticleContentParams>,

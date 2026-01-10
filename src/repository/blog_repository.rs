@@ -51,9 +51,7 @@ pub async fn get_posts(pool: PgPool, type_key: &String) -> Result<Vec<BlogPost>,
     }
 
     // 构建 IN 查询的占位符
-    let placeholders: Vec<String> = (1..=all_types.len())
-        .map(|i| format!("${}", i))
-        .collect();
+    let placeholders: Vec<String> = (1..=all_types.len()).map(|i| format!("${}", i)).collect();
     let query_placeholders = placeholders.join(",");
 
     // 构建最终查询语句
@@ -71,3 +69,9 @@ pub async fn get_posts(pool: PgPool, type_key: &String) -> Result<Vec<BlogPost>,
     query_builder.fetch_all(&pool).await
 }
 
+pub async fn get_posts_by_tag(pool: PgPool, tag: &String) -> Result<Vec<BlogPost>, sqlx::Error> {
+    sqlx::query_as::<_, BlogPost>("SELECT * FROM blog_posts WHERE tags @> ARRAY[$1]")
+        .bind(tag)
+        .fetch_all(&pool)
+        .await
+}
