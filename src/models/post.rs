@@ -1,3 +1,4 @@
+use serde::Deserialize;
 use serde::Serialize;
 use sqlx::FromRow;
 
@@ -26,3 +27,7 @@ pub struct BlogPost {
     pub keywords: Option<String>,
 }
 
+#[derive(Deserialize, Debug)]
+pub struct ArticleContentParams {
+    pub article_name: String,
+}
