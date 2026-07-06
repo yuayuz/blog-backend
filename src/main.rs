@@ -1,10 +1,11 @@
-mod db;
 mod handlers;
-mod models;
 mod routes;
-mod s3_client;
 mod service;
-mod repository;
+
+pub use blog_backend::db;
+pub use blog_backend::models;
+pub use blog_backend::repository;
+pub use blog_backend::s3_client;
 
 use crate::routes::router as routes_router;
 use axum::Router;

@@ -1,6 +1,5 @@
 use crate::models::post::{BlogPost, BlogPostType};
 use sqlx::PgPool;
-use std::mem::take;
 
 pub async fn get_all_types(pool: PgPool) -> Result<Vec<BlogPostType>, sqlx::Error> {
     sqlx::query_as::<_, BlogPostType>(
@@ -74,4 +73,28 @@ pub async fn get_posts_by_tag(pool: PgPool, tag: &String) -> Result<Vec<BlogPost
         .bind(tag)
         .fetch_all(&pool)
         .await
+}
+
+pub async fn insert_post(
+    pool: &PgPool,
+    title: &str,
+    slug: &str,
+    file_url: &str,
+    post_type: Option<&str>,
+    description: Option<&str>,
+    tags: Option<&Vec<String>>,
+) -> Result<BlogPost, sqlx::Error> {
+    sqlx::query_as::<_, BlogPost>(
+        "INSERT INTO blog_posts (title, slug, file_url, type, description, tags, status) 
+         VALUES ($1, $2, $3, $4, $5, $6, 'published')
+         RETURNING *"
+    )
+    .bind(title)
+    .bind(slug)
+    .bind(file_url)
+    .bind(post_type)
+    .bind(description)
+    .bind(tags)
+    .fetch_one(pool)
+    .await
 }

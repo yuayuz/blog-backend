@@ -25,6 +25,7 @@ pub struct BlogPost {
     pub meta_title: Option<String>,
     pub meta_description: Option<String>,
     pub keywords: Option<String>,
+    pub tags: Option<Vec<String>>,
 }
 
 #[derive(Deserialize, Debug)]

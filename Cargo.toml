@@ -5,7 +5,7 @@ edition = "2024"
 
 [dependencies]
 dotenvy = "0.15.7"
-axum = { version = "0.8.4", features = ["tokio", "macros", "http1"] }
+axum = { version = "0.8.4", features = ["tokio", "macros", "http1", "multipart"] }
 tokio = { version = "1.46.1", features = ["full"] }
 tracing = "0.1.41"
 tracing-subscriber = "0.3.19"
@@ -19,3 +19,5 @@ tower-http = { version = "0.6.6", features = ["cors"] }
 sqlx = { version = "0.8.6", features = ["runtime-tokio-rustls", "postgres", "macros", "uuid", "chrono"] }
 chrono = { version = "0.4", features = ["serde"] }
 serde_json = "1.0"
+clap = { version = "4.5", features = ["derive"] }
+uuid = { version = "1", features = ["v4"] }

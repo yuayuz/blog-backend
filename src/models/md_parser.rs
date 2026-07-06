@@ -4,19 +4,19 @@ use serde::{Deserialize, Serialize};
 pub struct FrontMatter {
     pub title: String,
     pub description: Option<String>,
-    pub date: String,
+    pub date: Option<String>,
     pub category: Option<String>,
     pub tags: Option<Vec<String>>,
 }
 
-pub(crate) fn parse_md(raw: &str) -> Result<(FrontMatter, String), Box<dyn std::error::Error>> {
+pub fn parse_md(raw: &str) -> Result<(FrontMatter, String), Box<dyn std::error::Error>> {
     if !raw.starts_with("---") {
         // 如果没有 front matter，返回默认值
         return Ok((
             FrontMatter {
                 title: "未命名文章".to_string(),
                 description: None,
-                date: chrono::Utc::now().format("%Y-%m-%d").to_string(),
+                date: Some(chrono::Utc::now().format("%Y-%m-%d").to_string()),
                 category: None,
                 tags: None,
             },
