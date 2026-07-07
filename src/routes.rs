@@ -6,12 +6,15 @@ use axum::response::IntoResponse;
 use axum::routing::get;
 
 pub fn router() -> Router<AppState> {
-    Router::new()
-        .route("/", get(root))
-        .nest("/gallery", gallery_handler::router())
-        .nest("/image", image_handler::router())
-        .nest("/blog", blog_handler::router())
-        .nest("/timeline", timeline_handler::router())
+    Router::new().nest(
+        "/rust",
+        Router::new()
+            .route("/", get(root))
+            .nest("/gallery", gallery_handler::router())
+            .nest("/image", image_handler::router())
+            .nest("/blog", blog_handler::router())
+            .nest("/timeline", timeline_handler::router()),
+    )
 }
 
 async fn root() -> impl IntoResponse {
