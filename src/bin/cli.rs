@@ -1,3 +1,16 @@
+//! Blog CLI — 通过命令行上传 Markdown 文章。
+//!
+//! ## 用法
+//!
+//! ```sh
+//! cargo run --bin cli -- path/to/article.md
+//! ```
+//!
+//! 会自动：
+//! 1. 解析 Markdown front matter
+//! 2. 上传正文到 OSS
+//! 3. 将文章元信息写入数据库
+
 use blog_backend::db::create_pool;
 use blog_backend::models::md_parser::parse_md;
 use blog_backend::repository::blog_repository::insert_post;
@@ -14,6 +27,7 @@ struct Cli {
     file_path: String,
 }
 
+/// CLI 入口：读取 .md 文件 → 解析 → 上传 OSS → 写入 DB。
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenvy::dotenv().ok();
@@ -84,7 +98,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-/// 根据标题生成 URL 友好的 slug
+/// 根据标题生成 URL 友好的 slug。
+///
+/// 规则与服务端 `generate_slug` 完全一致：
+/// 全转小写，非字母数字统一替换为 `-`，连续 `-` 合并，首尾 `-` 去除。
 fn generate_slug(title: &str) -> String {
     let slug = title
         .to_lowercase()

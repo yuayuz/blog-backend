@@ -14,6 +14,7 @@ use sqlx::PgPool;
 use std::sync::Arc;
 use tracing::error;
 
+/// 获取所有文章分类。
 pub async fn get_all_types_service(pool: PgPool) -> impl IntoResponse {
     let rows: Vec<BlogPostType> = get_all_types(pool).await.unwrap_or_else(|e| {
         error!("数据库查询失败: {}", e);
@@ -21,6 +22,8 @@ pub async fn get_all_types_service(pool: PgPool) -> impl IntoResponse {
     });
     Json(rows)
 }
+
+/// 获取一级分类列表（parent_type 为 NULL）。
 pub async fn get_primary_types_service(pool: PgPool) -> impl IntoResponse {
     let rows: Vec<BlogPostType> = get_primary_types(pool).await.unwrap_or_else(|e| {
         error!("数据库查询失败: {}", e);
@@ -28,6 +31,8 @@ pub async fn get_primary_types_service(pool: PgPool) -> impl IntoResponse {
     });
     Json(rows)
 }
+
+/// 获取某个父分类下的所有子分类。
 pub async fn get_child_types_service(pool: PgPool, parent: String) -> impl IntoResponse {
     let rows: Vec<BlogPostType> = get_child_types(pool, &parent).await.unwrap_or_else(|e| {
         error!("数据库查询失败: {}", e);
@@ -36,6 +41,7 @@ pub async fn get_child_types_service(pool: PgPool, parent: String) -> impl IntoR
     Json(rows)
 }
 
+/// 获取全部文章列表。
 pub async fn get_all_posts_service(pool: PgPool) -> impl IntoResponse {
     let rows: Vec<BlogPost> = get_all_posts(pool).await.unwrap_or_else(|e| {
         error!("数据库查询失败: {}", e);
@@ -44,6 +50,7 @@ pub async fn get_all_posts_service(pool: PgPool) -> impl IntoResponse {
     Json(rows)
 }
 
+/// 按分类获取文章（包含子分类下的文章）。
 pub async fn get_posts_service(pool: PgPool, type_key: String) -> impl IntoResponse {
     let rows: Vec<BlogPost> = get_posts(pool, &type_key).await.unwrap_or_else(|e| {
         error!("数据库查询失败: {}", e);
@@ -51,6 +58,8 @@ pub async fn get_posts_service(pool: PgPool, type_key: String) -> impl IntoRespo
     });
     Json(rows)
 }
+
+/// 按标签获取文章。
 pub async fn get_posts_by_tag_service(pool: PgPool, tag: String) -> impl IntoResponse {
     let rows: Vec<BlogPost> = get_posts_by_tag(pool, &tag).await.unwrap_or_else(|e| {
         error!("数据库查询失败: {}", e);
@@ -59,6 +68,16 @@ pub async fn get_posts_by_tag_service(pool: PgPool, tag: String) -> impl IntoRes
     Json(rows)
 }
 
+/// 从 OSS 拉取 Markdown 原文并解析，返回 front matter + 正文。
+///
+/// # 请求参数
+/// - `article_name`：OSS 上 `article/` 目录下的文件名（不含 `.md` 扩展名）。
+///
+/// # 返回
+/// ```json
+/// { "front_matter": { ... }, "content": "markdown 正文" }
+/// ```
+/// 若 OSS 文件不存在或编码异常，返回对应的错误状态码。
 pub async fn get_article_content_service(
     params: ArticleContentParams,
     bucket: Arc<Bucket>,
@@ -93,6 +112,17 @@ pub async fn get_article_content_service(
     }
 }
 
+/// 上传文章：解析 Markdown → 上传到 OSS → 写入数据库。
+///
+/// # 处理流程
+///
+/// 1. **解析 Markdown**：提取 YAML front matter（分类、标签、描述、日期）。
+/// 2. **上传到 OSS**：将 Markdown 正文以 `text/markdown` 类型存入 `article/` 目录。
+/// 3. **生成 slug**：由文件名（即标题）生成 URL 友好的唯一标识。
+/// 4. **写入数据库**：将文章元信息插入 `blog_posts` 表。
+///
+/// # 返回
+/// 成功时返回新文章的 `id`、`slug`、`title`。
 pub async fn upload_post_service(
     pool: PgPool,
     bucket: Arc<Bucket>,
@@ -171,7 +201,16 @@ pub async fn upload_post_service(
     }
 }
 
-/// 根据标题生成 URL 友好的 slug
+/// 根据标题生成 URL 友好的 slug。
+///
+/// 规则：
+/// - 全转小写
+/// - 字母数字保留，汉字和特殊符号转为 `-`
+/// - 空格、`-`、`_` 转为 `-`
+/// - 连续 `-` 合并为一个
+/// - 首尾 `-` 去除
+///
+/// 示例：`"Rust 异步编程入门"` → `"rust-----------"`
 fn generate_slug(title: &str) -> String {
     let slug = title
         .to_lowercase()

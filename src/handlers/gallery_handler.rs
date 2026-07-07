@@ -1,3 +1,5 @@
+//! 图库相关 API 路由。
+
 use crate::AppState;
 use crate::models::gallery::PaginationParams;
 use crate::service::gallery_service::{get_gallery_images, list_galleries};
@@ -7,12 +9,14 @@ use axum::routing::get;
 use sqlx::PgPool;
 use std::sync::Arc;
 
+/// 构建 `/rust/gallery/*` 下的子路由。
 pub fn router() -> Router<AppState> {
     Router::new()
         .route("/", get(list_galleries_handler))
         .route("/{name}/images", get(get_gallery_images_handler))
 }
 
+/// `GET /rust/gallery/` — 列出所有图库。
 async fn list_galleries_handler(
     State(state): State<AppState>,
 ) -> impl axum::response::IntoResponse {
@@ -22,6 +26,7 @@ async fn list_galleries_handler(
     list_galleries(pool, bucket).await
 }
 
+/// `GET /rust/gallery/{name}/images?page=1&page_size=9` — 获取图库内图片列表。
 async fn get_gallery_images_handler(
     Path(name): Path<String>,
     Query(params): Query<PaginationParams>,

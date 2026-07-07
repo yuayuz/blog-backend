@@ -1,3 +1,5 @@
+//! 图库服务：列出相册、获取图片列表。
+
 use crate::models::gallery::{GalleryEntity, GalleryResponse, PaginationParams};
 use crate::repository::gallery_repository::get_all_galleries;
 use axum::Json;
@@ -9,6 +11,9 @@ use sqlx::PgPool;
 use std::sync::Arc;
 use tracing::error;
 
+/// 列出所有图库，封面图从 OSS 拉取并转为 Base64 返回。
+///
+/// 对每个图库实体，根据 `cover_url` 从 OSS 取图、base64 编码后嵌在响应中。
 pub async fn list_galleries(pool: PgPool, bucket: Arc<Bucket>) -> impl IntoResponse {
     let rows: Vec<GalleryEntity> = match get_all_galleries(pool).await {
         Ok(rows) => rows,
@@ -48,6 +53,10 @@ pub async fn list_galleries(pool: PgPool, bucket: Arc<Bucket>) -> impl IntoRespo
     Json(galleries)
 }
 
+/// 获取某个图库下的图片列表（分页）。
+///
+/// 直接从 OSS 的 `gallery/{name}/` 目录下 list 对象，
+/// 支持分页，默认每页 9 张。
 pub async fn get_gallery_images(
     name: String,
     params: PaginationParams,
