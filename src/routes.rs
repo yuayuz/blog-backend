@@ -18,15 +18,12 @@ use axum::routing::get;
 ///   └── /timeline/... → 时间线
 /// ```
 pub fn router() -> Router<AppState> {
-    Router::new().nest(
-        "/rust",
-        Router::new()
-            .route("/", get(root))
-            .nest("/gallery", gallery_handler::router())
-            .nest("/image", image_handler::router())
-            .nest("/blog", blog_handler::router())
-            .nest("/timeline", timeline_handler::router()),
-    )
+    Router::new()
+        .route("/", get(root))
+        .nest("/gallery", gallery_handler::router())
+        .nest("/image", image_handler::router())
+        .nest("/blog", blog_handler::router())
+        .nest("/timeline", timeline_handler::router())
 }
 
 /// 根路径，用于健康检查。
