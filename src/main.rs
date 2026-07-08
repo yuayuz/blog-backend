@@ -6,8 +6,8 @@ pub use blog_backend::db;
 pub use blog_backend::models;
 pub use blog_backend::repository;
 pub use blog_backend::s3_client;
-
 use crate::routes::router as routes_router;
+use crate::service::photo_service::PhotoCache;
 use axum::Router;
 use axum::http::Method;
 use db::create_pool;
@@ -15,7 +15,7 @@ use dotenvy::dotenv;
 use s3::Bucket;
 use sqlx::PgPool;
 use std::env;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use tower_http::cors::{Any, CorsLayer};
 use tracing::info;
 
@@ -27,6 +27,7 @@ use tracing::info;
 pub struct AppState {
     pub pool: PgPool,
     pub bucket: Arc<Bucket>,
+    pub photo_cache: Arc<Mutex<PhotoCache>>,
 }
 
 /// 程序入口：加载配置 → 初始化 OSS/DB → 构建路由 → 启动 HTTP 服务
@@ -43,7 +44,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let pool = create_pool().await;
 
-    let state = AppState { pool, bucket };
+    let photo_cache = Arc::new(Mutex::new(PhotoCache::new(180))); // 3 minutes
+
+    let state = AppState {
+        pool,
+        bucket,
+        photo_cache,
+    };
 
     let addr = env::var("SERVER_ADDR").unwrap_or_else(|_| "0.0.0.0:8000".to_string());
 

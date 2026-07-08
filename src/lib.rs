@@ -31,6 +31,7 @@
 //! | `GET  /rust/gallery/{name}/images` | 获取图库中的图片 |
 //! | `GET  /rust/image/{*path}` | 图片代理/转发 |
 //! | `GET  /rust/timeline/` | 获取时间线 |
+//! | `GET  /rust/photo-wall/?count=20` | 照片墙（随机选取） |
 //!
 //! ## 环境变量
 //!

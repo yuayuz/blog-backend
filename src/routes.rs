@@ -1,7 +1,7 @@
 //! 顶层路由聚合，所有 API 统一挂载在 `/rust` 路径下。
 
 use crate::AppState;
-use crate::handlers::{blog_handler, gallery_handler, image_handler, timeline_handler};
+use crate::handlers::{blog_handler, gallery_handler, image_handler, photo_handler, timeline_handler};
 use axum::Router;
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
@@ -24,6 +24,7 @@ pub fn router() -> Router<AppState> {
         .nest("/image", image_handler::router())
         .nest("/blog", blog_handler::router())
         .nest("/timeline", timeline_handler::router())
+        .nest("/photo-wall", photo_handler::router())
 }
 
 /// 根路径，用于健康检查。

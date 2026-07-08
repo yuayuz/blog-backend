@@ -285,6 +285,7 @@ dependencies = [
  "chrono",
  "clap",
  "dotenvy",
+ "rand",
  "regex",
  "rust-s3",
  "serde",
