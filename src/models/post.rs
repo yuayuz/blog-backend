@@ -52,7 +52,7 @@ pub struct BlogPost {
 
 /// 获取文章内容的查询参数。
 ///
-/// 示例: `GET /rust/blog/article?article_name=my-post`
+/// 示例: `GET /blog/article?article_name=my-post`
 #[derive(Deserialize, Debug)]
 pub struct ArticleContentParams {
     /// OSS 上的文件名（不含扩展名和目录前缀），如 `"my-post"`

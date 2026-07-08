@@ -1,4 +1,4 @@
-//! 顶层路由聚合，所有 API 统一挂载在 `/rust` 路径下。
+//! 顶层路由聚合，所有 API 直接挂载在根路径下。
 
 use crate::AppState;
 use crate::handlers::{blog_handler, gallery_handler, image_handler, photo_handler, timeline_handler};
@@ -10,12 +10,13 @@ use axum::routing::get;
 /// 构建整个应用的路由树：
 ///
 /// ```text
-/// /rust
-///   ├── /             → "Hello,Rust!"
-///   ├── /gallery/...  → 图库相关接口
-///   ├── /image/...    → 图片代理
-///   ├── /blog/...     → 博客文章 CRUD
-///   └── /timeline/... → 时间线
+/// /
+///   ├── /                  → "Hello,Rust!"
+///   ├── /gallery/...       → 图库相关接口
+///   ├── /image/...         → 图片代理
+///   ├── /blog/...          → 博客文章 CRUD
+///   ├── /timeline/...      → 时间线
+///   └── /photo-wall/...    → 照片墙
 /// ```
 pub fn router() -> Router<AppState> {
     Router::new()

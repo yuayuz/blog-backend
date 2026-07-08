@@ -12,26 +12,26 @@
 //! - `handlers` — HTTP 请求处理器
 //! - `routes` — 路由聚合
 //!
-//! ## API 路由前缀
+//! ## API 路由
 //!
-//! 所有接口统一挂载在 `/rust` 路径下：
+//! 所有接口直接挂载在根路径下：
 //!
 //! | 路径 | 说明 |
 //! |------|------|
-//! | `GET  /rust/` | 服务根路径，返回 "Hello,Rust!" |
-//! | `GET  /rust/blog/allTypes` | 获取所有文章分类 |
-//! | `GET  /rust/blog/primaryTypes` | 获取一级分类 |
-//! | `GET  /rust/blog/childTypes/{parent}` | 获取某分类的子分类 |
-//! | `GET  /rust/blog/allPosts` | 获取全部文章列表 |
-//! | `GET  /rust/blog/posts/type/{type_key}` | 按分类获取文章 |
-//! | `GET  /rust/blog/posts/tag/{tag}` | 按标签获取文章 |
-//! | `GET  /rust/blog/article?article_name=xxx` | 获取文章详情（Markdown） |
-//! | `POST /rust/blog/upload` | 上传文章（multipart/form-data） |
-//! | `GET  /rust/gallery/` | 列出所有图库 |
-//! | `GET  /rust/gallery/{name}/images` | 获取图库中的图片 |
-//! | `GET  /rust/image/{*path}` | 图片代理/转发 |
-//! | `GET  /rust/timeline/` | 获取时间线 |
-//! | `GET  /rust/photo-wall/?count=20` | 照片墙（随机选取） |
+//! | `GET  /` | 服务根路径，返回 "Hello,Rust!" |
+//! | `GET  /blog/allTypes` | 获取所有文章分类 |
+//! | `GET  /blog/primaryTypes` | 获取一级分类 |
+//! | `GET  /blog/childTypes/{parent}` | 获取某分类的子分类 |
+//! | `GET  /blog/allPosts` | 获取全部文章列表 |
+//! | `GET  /blog/posts/type/{type_key}` | 按分类获取文章 |
+//! | `GET  /blog/posts/tag/{tag}` | 按标签获取文章 |
+//! | `GET  /blog/article?article_name=xxx` | 获取文章详情（Markdown） |
+//! | `POST /blog/upload` | 上传文章（multipart/form-data） |
+//! | `GET  /gallery/` | 列出所有图库 |
+//! | `GET  /gallery/{name}/images` | 获取图库中的图片 |
+//! | `GET  /image/{*path}` | 图片代理/转发 |
+//! | `GET  /timeline/` | 获取时间线 |
+//! | `GET  /photo-wall/?count=20` | 照片墙（随机选取） |
 //!
 //! ## 环境变量
 //!
